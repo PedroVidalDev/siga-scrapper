@@ -1,3 +1,5 @@
+import cors from "cors";
+import helmet from "helmet";
 import express, { Express } from "express";
 
 export class App {
@@ -11,6 +13,35 @@ export class App {
     private setupExpressApp(): Express {
         const expressApp = express();
 
-        expressApp.use(cors)
+        expressApp.use(cors({
+            origin: ["http://localhost:3000"],
+            credentials: true
+        }));
+
+        expressApp.use(helmet());
+
+        expressApp.use(express.json());
+
+        //TODO routes
+
+        return expressApp;
+    }
+
+    public static getInstance(): App {
+        if(!App.instance) {
+            App.instance = new App();
+        }
+
+        return App.instance;
+    }
+
+    public getExpressApp(): Express {
+        return this.expressApp;
+    }
+
+    public run(port: number) {
+        return this.expressApp.listen(port, () => {
+            console.log("Server start at port " + port);
+        })
     }
 }

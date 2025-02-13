@@ -8,3 +8,5 @@ router.use("/health", (req: Request, res: Response) => {
 })
 
 router.use("/siga", SigaRouter);
+
+export default router;

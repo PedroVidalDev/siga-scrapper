@@ -1,6 +1,7 @@
 import cors from "cors";
 import helmet from "helmet";
 import express, { Express } from "express";
+import router from "./routes/IndexRouter";
 
 export class App {
     private static instance: App;
@@ -22,7 +23,7 @@ export class App {
 
         expressApp.use(express.json());
 
-        //TODO routes
+        expressApp.use(router);
 
         return expressApp;
     }

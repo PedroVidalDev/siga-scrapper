@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { SigaService } from "../services/SigaService";
 import { LoginDTO } from "../dtos/Auth/LoginDTO";
+import { SigaService } from "../services/SigaService";
 
 export class SigaController {
     private service: SigaService;

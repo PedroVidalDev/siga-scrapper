@@ -1,4 +1,4 @@
-import { Request, Router } from "express";
+import { Request, Response, Router } from "express";
 import { SigaController } from "../controllers/SigaController";
 
 const controller = new SigaController();

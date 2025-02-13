@@ -38,8 +38,8 @@ export class ScraperService {
     public async getAbsencesInfo(loginDto: LoginDTO) {
         if(await this.login(loginDto)) {
             await this.page.click("#ygtvlabelel11Span");
-            await this.page.waitForNavigation({ waitUntil: 'networkidle0' });
 
+            await this.page.waitForSelector(".GridClearOdd", { visible: true });
             const tableLines = await this.page.$$(".GridClearOdd");
 
             const absencesList: AbsencesDTO[] = [];

@@ -1,8 +1,8 @@
 export enum DayEnum {
-    MONDAY = "monday",
-    TUESDAY = "tuesday",
-    WEDNESDAY = "wednesday",
-    THURSDAY = "thursday",
-    FRIDAY = "friday",
-    SATURDAY = "saturday"
+    MONDAY = "Segunda-Feira",
+    TUESDAY = "Terça-Feira",
+    WEDNESDAY = "Quarta-Feira",
+    THURSDAY = "Quinta-Feira",
+    FRIDAY = "Sexta-Feira",
+    SATURDAY = "Sábado",
 }

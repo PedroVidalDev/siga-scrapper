@@ -10,5 +10,6 @@ router.get("/", () => {
 })
 
 router.get("/absences", (req: Request, res: Response) => controller.getAbsencesInfo(req, res));
+router.get("/classtimes", (req: Request, res: Response) => controller.getClasstimes(req, res));
 
 export default router;

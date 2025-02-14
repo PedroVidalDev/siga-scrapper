@@ -1,13 +1,13 @@
+import { DisciplineDTO } from "../Disciplines/DisciplineDTO";
+
 export class AbsenceDTO {
     public presences: number;
     public absences: number;
-    public discipline: string;
-    public teacher?: string;
+    public discipline?: DisciplineDTO;
 
-    constructor(presences: number, absences: number, discipline: string, teacher?: string) {
+    constructor(presences: number, absences: number, discipline?: DisciplineDTO) {
         this.presences = presences;
         this.absences = absences;
         this.discipline = discipline;
-        this.teacher = teacher;
     }
 }

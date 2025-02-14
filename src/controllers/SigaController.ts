@@ -17,4 +17,12 @@ export class SigaController {
         res.status(200).json(data)
     }
 
+    public async getClasstimes(req: Request, res: Response) {
+        const { username, password } = req.body;
+
+        const data = await this.service.getClasstimeInfo(new LoginDTO(username, password));
+
+        res.status(200).json(data)
+    }
+
 }

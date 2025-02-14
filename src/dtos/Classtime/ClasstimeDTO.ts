@@ -2,14 +2,12 @@ import { DayEnum } from "../../enums/DayEnum";
 import { DisciplineDTO } from "../Disciplines/DisciplineDTO";
 
 export class ClasstimeDTO {
-    public discipline: DisciplineDTO;
-    public day: DayEnum;
     public startTime: string;
     public endTime: string;
+    public discipline?: DisciplineDTO;
 
-    constructor(discipline: DisciplineDTO, day: DayEnum, startTime: string, endTime: string) {
+    constructor(startTime: string, endTime: string, discipline?: DisciplineDTO) {
         this.discipline = discipline;
-        this.day = day;
         this.startTime = startTime;
         this.endTime = endTime;
     }

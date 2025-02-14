@@ -12,9 +12,9 @@ export class SigaController {
     public async getAbsencesInfo(req: Request, res: Response) {
         const { username, password } = req.body;
 
-        this.service.getAbsencesInfo(new LoginDTO(username, password));
+        const data = await this.service.getAbsencesInfo(new LoginDTO(username, password));
 
-        res.status(200).send("foi")
+        res.status(200).json(data)
     }
 
 }

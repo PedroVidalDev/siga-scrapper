@@ -11,8 +11,6 @@ export class SigaService {
 
     public async getAbsencesInfo(loginDto: LoginDTO): Promise<AbsenceDTO[]> {
         const absencesList: AbsenceDTO[] | undefined = await this.scraperService.getAbsencesInfo(loginDto);
-        await this.scraperService.closePage();
-        
         if(absencesList) {
             return absencesList;
         } else {

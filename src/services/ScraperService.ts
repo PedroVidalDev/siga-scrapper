@@ -12,17 +12,21 @@ export class ScraperService {
     private isAuth: boolean = false;
 
     constructor() {
-        this.initPage();
+        this.initPage().catch(console.error);;
     }
 
     public async initPage() {
-        const browser = await puppeteer.launch({ headless: false });
-        this.browser = browser;
-        this.page = await browser.newPage();
+        if (!this.browser) {
+            this.browser = await puppeteer.launch({ headless: false});
+        }
+    
+        if (!this.page) {
+            this.page = await this.browser.newPage();
+        }
     }
 
     public async closePage() {
-        await this.browser.close();
+        await this.page.close();          
     }
 
     public async login(loginDto: LoginDTO): Promise<boolean> {
@@ -51,11 +55,10 @@ export class ScraperService {
         if(await this.login(loginDto)) {
             const disciplines = await this.getDisciplinesInfo(loginDto);
             if(!disciplines) {
-                throw new Error("Disciplines not found");
+                return undefined;
             }
 
             await this.page.click("#ygtvlabelel11Span");
-
             await this.page.waitForSelector("#Grid1ContainerDiv", { visible: true });
             const tableLines = await this.page.$$(".GridClearOdd");
 
@@ -76,17 +79,12 @@ export class ScraperService {
                 const absenceDto = new AbsenceDTO(Number(textContents[2]), Number(textContents[3]), textContents[1]);
                 
                 const discipline = disciplines.find(discipline => discipline.name.includes(absenceDto.discipline));
-
                 if(discipline) {
-                    console.log(absenceDto)
-                    console.log(discipline)
                     absenceDto.teacher = discipline.teacher;
                 }
 
-                absencesList.push();
+                absencesList.push(absenceDto);
             };
-
-            console.log(absencesList)
 
             return absencesList;
         }

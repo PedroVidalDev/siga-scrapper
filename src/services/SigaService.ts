@@ -1,4 +1,4 @@
-import { AbsencesDTO } from "../dtos/Absences/AbsencesDTO";
+import { AbsenceDTO } from "../dtos/Absences/AbsenceDTO";
 import { LoginDTO } from "../dtos/Auth/LoginDTO";
 import { ScraperService } from "./ScraperService";
 
@@ -9,9 +9,10 @@ export class SigaService {
         this.scraperService = new ScraperService();
     }
 
-    public async getAbsencesInfo(loginDto: LoginDTO): Promise<AbsencesDTO[]> {
-        const absencesList: AbsencesDTO[] | undefined = await this.scraperService.getAbsencesInfo(loginDto);
-
+    public async getAbsencesInfo(loginDto: LoginDTO): Promise<AbsenceDTO[]> {
+        const absencesList: AbsenceDTO[] | undefined = await this.scraperService.getAbsencesInfo(loginDto);
+        await this.scraperService.closePage();
+        
         if(absencesList) {
             return absencesList;
         } else {

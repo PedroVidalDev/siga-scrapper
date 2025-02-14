@@ -2,12 +2,14 @@ import puppeteer, { Browser, Page } from "puppeteer";
 
 import { LoginDTO } from "../dtos/Auth/LoginDTO";
 import { ScrapUtils } from "../utils/ScrapUtils";
-import { AbsencesDTO } from "../dtos/Absences/AbsencesDTO";
+import { AbsenceDTO } from "../dtos/Absences/AbsenceDTO";
+import { DisciplineDTO } from "../dtos/Disciplines/DisciplineDTO";
 
 export class ScraperService {
     private url: string = "https://siga.cps.sp.gov.br/aluno/login.aspx";
     private browser!: Browser;
     private page!: Page;
+    private isAuth: boolean = false;
 
     constructor() {
         this.initPage();
@@ -19,7 +21,15 @@ export class ScraperService {
         this.page = await browser.newPage();
     }
 
+    public async closePage() {
+        await this.browser.close();
+    }
+
     public async login(loginDto: LoginDTO): Promise<boolean> {
+        if(this.isAuth) {
+            return this.isAuth;
+        }
+
         await this.page.goto(this.url);
 
         await ScrapUtils.typeInput(this.page, "#vSIS_USUARIOID", loginDto.username);
@@ -32,17 +42,24 @@ export class ScraperService {
             return document.querySelector("#TABLE5") !== null;
         })
 
+        this.isAuth = isLoginSuccessfull;
+
         return isLoginSuccessfull;
     }
 
-    public async getAbsencesInfo(loginDto: LoginDTO) {
+    public async getAbsencesInfo(loginDto: LoginDTO): Promise<AbsenceDTO[] | undefined> {
         if(await this.login(loginDto)) {
+            const disciplines = await this.getDisciplinesInfo(loginDto);
+            if(!disciplines) {
+                throw new Error("Disciplines not found");
+            }
+
             await this.page.click("#ygtvlabelel11Span");
 
-            await this.page.waitForSelector(".GridClearOdd", { visible: true });
+            await this.page.waitForSelector("#Grid1ContainerDiv", { visible: true });
             const tableLines = await this.page.$$(".GridClearOdd");
 
-            const absencesList: AbsencesDTO[] = [];
+            const absencesList: AbsenceDTO[] = [];
 
             for (const line of tableLines) {
                 const textContents: string[] = [];
@@ -56,10 +73,50 @@ export class ScraperService {
                     }
                 };
 
-                absencesList.push(new AbsencesDTO(Number(textContents[2]), Number(textContents[3]), textContents[1], "teste"));
+                const absenceDto = new AbsenceDTO(Number(textContents[2]), Number(textContents[3]), textContents[1]);
+                
+                const discipline = disciplines.find(discipline => discipline.name.includes(absenceDto.discipline));
+
+                if(discipline) {
+                    console.log(absenceDto)
+                    console.log(discipline)
+                    absenceDto.teacher = discipline.teacher;
+                }
+
+                absencesList.push();
             };
 
+            console.log(absencesList)
+
             return absencesList;
+        }
+    }
+
+    public async getDisciplinesInfo(loginDto: LoginDTO): Promise<DisciplineDTO[] | undefined> {
+        if(await this.login(loginDto)) {
+            await this.page.click("#ygtvlabelel9Span");
+
+            await this.page.waitForSelector("#Grid1ContainerTbl", { visible: true });
+            const tableLines = await this.page.$$("#Grid1ContainerTbl .GridClearOdd");
+
+            const disciplineList: DisciplineDTO[] = [];
+
+            for (const line of tableLines) {
+                const textContents: string[] = [];
+
+                const items = await line.$$("td");
+
+                for (const element of items) {
+                    const text = await this.page.evaluate(el => el.textContent?.trim(), element);
+                    if(text) {
+                        textContents.push(text);
+                    }
+                };
+
+                disciplineList.push(new DisciplineDTO(textContents[0], textContents[1].split("-")[0].trim(), textContents[3]));
+            };
+
+            return disciplineList;
         }
     }
 }

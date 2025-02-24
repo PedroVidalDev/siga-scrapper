@@ -9,18 +9,10 @@ export class SigaController {
         this.service = new SigaService();
     }
 
-    public async getAbsencesInfo(req: Request, res: Response) {
+    public async getSigaInfos(req: Request, res: Response) {
         const { username, password } = req.body;
 
-        const data = await this.service.getAbsencesInfo(new LoginDTO(username, password));
-
-        res.status(200).json(data)
-    }
-
-    public async getClasstimes(req: Request, res: Response) {
-        const { username, password } = req.body;
-
-        const data = await this.service.getClasstimeInfo(new LoginDTO(username, password));
+        const data = await this.service.getSigaInfos(new LoginDTO(username, password));
 
         res.status(200).json(data)
     }

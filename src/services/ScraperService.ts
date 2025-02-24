@@ -9,60 +9,51 @@ import { DayEnum } from "../enums/DayEnum";
 import { DayTimesDTO } from "../dtos/Classtime/DayTimesDTO";
 
 export class ScraperService {
+
     private url: string = "https://siga.cps.sp.gov.br/aluno/login.aspx";
-    private browser!: Browser;
-    private page!: Page;
-    private isAuth: boolean = false;
 
-    public async initPage() {
-        if (!this.browser) {
-            this.browser = await puppeteer.launch({ headless: false});
-        }
-    
-        if (!this.page) {
-            this.page = await this.browser.newPage();
-        }
+    public async main(loginDto: LoginDTO) {
+        const browser: Browser = await puppeteer.launch({ headless: false});
+        const page: Page = await browser.newPage();
+
+        const isAuth = await this.login(page, loginDto);
+        const absences = await this.getAbsencesInfo(page, isAuth);
+        const disciplines = await this.getDisciplinesInfo(page, isAuth);
+        const classtimes = await this.getClasstimeInfo(page, isAuth);
+
+        return [
+            absences,
+            disciplines,
+            classtimes
+        ]
     }
 
-    public async closePage() {
-        await this.page.close();
-        await this.browser.close();
-    }
+    public async login(page: Page, loginDto: LoginDTO): Promise<boolean> {
+        await page.goto(this.url);
 
-    public async login(loginDto: LoginDTO): Promise<boolean> {
-        if(this.isAuth) {
-            return this.isAuth;
-        }
+        await ScrapUtils.typeInput(page, "#vSIS_USUARIOID", loginDto.username);
+        await ScrapUtils.typeInput(page, "#vSIS_USUARIOSENHA", loginDto.password);
 
-        await this.page.goto(this.url);
+        await page.click("[name='BTCONFIRMA']");
+        await page.waitForNavigation({ waitUntil: 'networkidle0' });
 
-        await ScrapUtils.typeInput(this.page, "#vSIS_USUARIOID", loginDto.username);
-        await ScrapUtils.typeInput(this.page, "#vSIS_USUARIOSENHA", loginDto.password);
-
-        await this.page.click("[name='BTCONFIRMA']");
-        await this.page.waitForNavigation({ waitUntil: 'networkidle0' });
-
-        const isLoginSuccessfull = await this.page.evaluate(() => {
+        const isLoginSuccessfull = await page.evaluate(() => {
             return document.querySelector("#TABLE5") !== null;
         })
-
-        this.isAuth = isLoginSuccessfull;
 
         return isLoginSuccessfull;
     }
 
-    public async getAbsencesInfo(loginDto: LoginDTO): Promise<AbsenceDTO[] | undefined> {
-        await this.initPage();
-
-        if(await this.login(loginDto)) {
-            const disciplines = await this.getDisciplinesInfo(loginDto);
+    public async getAbsencesInfo(page: Page, isAuth: boolean): Promise<AbsenceDTO[] | undefined> {
+        if(isAuth) {
+            const disciplines = await this.getDisciplinesInfo(page, isAuth);
             if(!disciplines) {
                 throw new Error();
             }
 
-            await this.page.click("#ygtvlabelel11Span");
-            await this.page.waitForSelector("#Grid1ContainerDiv", { visible: true });
-            const tableLines = await this.page.$$(".GridClearOdd");
+            await page.click("#ygtvlabelel11Span");
+            await page.waitForSelector("#Grid1ContainerDiv", { visible: true });
+            const tableLines = await page.$$(".GridClearOdd");
 
             const absencesList: AbsenceDTO[] = [];
 
@@ -72,7 +63,7 @@ export class ScraperService {
                 const items = await line.$$("td");
 
                 for (const element of items) {
-                    const text = await this.page.evaluate(el => el.textContent?.trim(), element);
+                    const text = await page.evaluate(el => el.textContent?.trim(), element);
                     if(text) {
                         textContents.push(text);
                     }
@@ -96,14 +87,12 @@ export class ScraperService {
         }
     }
 
-    public async getDisciplinesInfo(loginDto: LoginDTO): Promise<DisciplineDTO[] | undefined> {
-        await this.initPage();
+    public async getDisciplinesInfo(page: Page, isAuth: boolean): Promise<DisciplineDTO[] | undefined> {
+        if(isAuth) {
+            await page.click("#ygtvlabelel9Span");
 
-        if(await this.login(loginDto)) {
-            await this.page.click("#ygtvlabelel9Span");
-
-            await this.page.waitForSelector("#Grid1ContainerTbl", { visible: true });
-            const tableLines = await this.page.$$("#Grid1ContainerTbl .GridClearOdd");
+            await page.waitForSelector("#Grid1ContainerTbl", { visible: true });
+            const tableLines = await page.$$("#Grid1ContainerTbl .GridClearOdd");
 
             const disciplineList: DisciplineDTO[] = [];
 
@@ -113,7 +102,7 @@ export class ScraperService {
                 const items = await line.$$("td");
 
                 for (const element of items) {
-                    const text = await this.page.evaluate(el => el.textContent?.trim(), element);
+                    const text = await page.evaluate(el => el.textContent?.trim(), element);
                     if(text) {
                         textContents.push(text);
                     }
@@ -130,20 +119,18 @@ export class ScraperService {
         }
     }
 
-    public async getClasstimeInfo(loginDto: LoginDTO): Promise<DayTimesDTO[] | undefined> {
-        await this.initPage();
-        
-        if(await this.login(loginDto)) {
-            const disciplines = await this.getDisciplinesInfo(loginDto);
+    public async getClasstimeInfo(page: Page, isAuth: boolean): Promise<DayTimesDTO[] | undefined> {        
+        if(isAuth) {
+            const disciplines = await this.getDisciplinesInfo(page, isAuth);
             if(!disciplines) {
                 throw new Error();
             }
 
             const dayTimes: DayTimesDTO[] = [];
 
-            await this.page.waitForSelector(".GridClear", { visible: true });
-            const tables = await this.page.$$("#TABLE3 .GridClear");
-            const tableTitles = await this.page.$$("#TABLE3 .TextBlock");
+            await page.waitForSelector(".GridClear", { visible: true });
+            const tables = await page.$$("#TABLE3 .GridClear");
+            const tableTitles = await page.$$("#TABLE3 .TextBlock");
 
             let i = 0;
             for(const table of tables) {
@@ -158,7 +145,7 @@ export class ScraperService {
                     const cells = await line.$$("td");
     
                     for (const textElement of cells) {
-                        const text = await this.page.evaluate(el => el.textContent?.trim(), textElement);
+                        const text = await page.evaluate(el => el.textContent?.trim(), textElement);
                         if(text) {
                             textContents.push(text);
                         }
@@ -177,7 +164,7 @@ export class ScraperService {
                     classtimeList.push(classtimeDto);
                 };
 
-                const day = await this.page.evaluate(el => el.textContent?.trim(), tableTitles[i]) as DayEnum;
+                const day = await page.evaluate(el => el.textContent?.trim(), tableTitles[i]) as DayEnum;
                 dayTimes.push(new DayTimesDTO(day, classtimeList));
                 i++;
             }

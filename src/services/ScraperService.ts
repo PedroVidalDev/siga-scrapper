@@ -1,12 +1,15 @@
 import puppeteer, { Browser, Page } from "puppeteer";
 
 import { LoginDTO } from "../dtos/Auth/LoginDTO";
-import { ScrapUtils } from "../utils/ScrapUtils";
+import { GradeDTO } from "../dtos/Grades/GradeDTO";
 import { AbsenceDTO } from "../dtos/Absences/AbsenceDTO";
-import { DisciplineDTO } from "../dtos/Disciplines/DisciplineDTO";
-import { ClasstimeDTO } from "../dtos/Classtime/ClasstimeDTO";
-import { DayEnum } from "../enums/DayEnum";
 import { DayTimesDTO } from "../dtos/Classtime/DayTimesDTO";
+import { ClasstimeDTO } from "../dtos/Classtime/ClasstimeDTO";
+import { DisciplineDTO } from "../dtos/Disciplines/DisciplineDTO";
+
+import { DayEnum } from "../enums/DayEnum";
+
+import { ScrapUtils } from "../utils/ScrapUtils";
 
 export class ScraperService {
 
@@ -162,6 +165,14 @@ export class ScraperService {
                 i++;
             }
             return dayTimes;
+        }
+    }
+
+    public async getGradesInfo(page: Page, isAuth: boolean, disciplines: DisciplineDTO[]) {
+        if(isAuth) {
+            const grades: GradeDTO[] = [];
+
+            let disciplineTemplate = (n: number) => `span_vACD_DISCIPLINASIGLA_000${n}`
         }
     }
 }

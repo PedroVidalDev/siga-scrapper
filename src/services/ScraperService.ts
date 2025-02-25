@@ -17,9 +17,9 @@ export class ScraperService {
         const page: Page = await browser.newPage();
 
         const isAuth = await this.login(page, loginDto);
-        const absences = await this.getAbsencesInfo(page, isAuth);
         const disciplines = await this.getDisciplinesInfo(page, isAuth);
-        const classtimes = await this.getClasstimeInfo(page, isAuth);
+        const absences = await this.getAbsencesInfo(page, isAuth, disciplines!);
+        const classtimes = await this.getClasstimeInfo(page, isAuth, disciplines!);
 
         await page.close();
         await browser.close();
@@ -47,13 +47,8 @@ export class ScraperService {
         return isLoginSuccessfull;
     }
 
-    public async getAbsencesInfo(page: Page, isAuth: boolean): Promise<AbsenceDTO[] | undefined> {
+    public async getAbsencesInfo(page: Page, isAuth: boolean, disciplines: DisciplineDTO[]): Promise<AbsenceDTO[] | undefined> {
         if(isAuth) {
-            const disciplines = await this.getDisciplinesInfo(page, isAuth);
-            if(!disciplines) {
-                throw new Error();
-            }
-
             await page.click("#ygtvlabelel11Span");
             await page.waitForSelector("#Grid1ContainerDiv", { visible: true });
             const tableLines = await page.$$(".GridClearOdd");
@@ -122,13 +117,8 @@ export class ScraperService {
         }
     }
 
-    public async getClasstimeInfo(page: Page, isAuth: boolean): Promise<DayTimesDTO[] | undefined> {        
+    public async getClasstimeInfo(page: Page, isAuth: boolean, disciplines: DisciplineDTO[]): Promise<DayTimesDTO[] | undefined> {        
         if(isAuth) {
-            const disciplines = await this.getDisciplinesInfo(page, isAuth);
-            if(!disciplines) {
-                throw new Error();
-            }
-
             const dayTimes: DayTimesDTO[] = [];
 
             await page.waitForSelector(".GridClear", { visible: true });

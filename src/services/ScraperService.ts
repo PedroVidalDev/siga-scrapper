@@ -21,6 +21,9 @@ export class ScraperService {
         const disciplines = await this.getDisciplinesInfo(page, isAuth);
         const classtimes = await this.getClasstimeInfo(page, isAuth);
 
+        await page.close();
+        await browser.close();
+
         return [
             absences,
             disciplines,

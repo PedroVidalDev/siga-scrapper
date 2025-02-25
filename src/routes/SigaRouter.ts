@@ -5,6 +5,6 @@ const controller = new SigaController();
 
 const router = Router();
 
-router.get("/", (req: Request, res: Response) => controller.getSigaInfos(req, res));
+router.post("/", (req: Request, res: Response) => controller.getSigaInfos(req, res));
 
 export default router;

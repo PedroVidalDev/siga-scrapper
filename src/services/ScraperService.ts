@@ -23,14 +23,21 @@ export class ScraperService {
         const disciplines = await this.getDisciplinesInfo(page, isAuth);
         const absences = await this.getAbsencesInfo(page, isAuth, disciplines!);
         const classtimes = await this.getClasstimeInfo(page, isAuth, disciplines!);
+        const grades = await this.getGradesInfo(page, isAuth, disciplines!);
 
         await page.close();
         await browser.close();
 
+        console.log({disciplines})
+        console.log({absences})
+        console.log({classtimes})
+        console.log({grades})
+
         return [
             absences,
             disciplines,
-            classtimes
+            classtimes,
+            grades
         ]
     }
 
@@ -124,6 +131,8 @@ export class ScraperService {
         if(isAuth) {
             const dayTimes: DayTimesDTO[] = [];
 
+            await page.click("#ygtvlabelel9Span");
+
             await page.waitForSelector(".GridClear", { visible: true });
             const tables = await page.$$("#TABLE3 .GridClear");
             const tableTitles = await page.$$("#TABLE3 .TextBlock");
@@ -168,11 +177,39 @@ export class ScraperService {
         }
     }
 
-    public async getGradesInfo(page: Page, isAuth: boolean, disciplines: DisciplineDTO[]) {
+    public async getGradesInfo(page: Page, isAuth: boolean, disciplines: DisciplineDTO[]): Promise<GradeDTO[] | undefined> {
         if(isAuth) {
+            await page.click("#ygtvlabelel10Span");
+            await page.waitForSelector("#span_vACD_DISCIPLINASIGLA_0001", { visible: true });
+
             const grades: GradeDTO[] = [];
 
-            let disciplineTemplate = (n: number) => `span_vACD_DISCIPLINASIGLA_000${n}`
+            let disciplineCodTemplate = (n: number) => `#span_vACD_DISCIPLINASIGLA_000${n}`
+            let disciplineGradeTemplate = (n: number, s: number) => `#span_vACD_PLANOENSINOAVALIACAOPARCIALNOTA_000${n}000${s}`
+
+            for(let i = 0; i < disciplines.length; i++) {
+                const disciplineCode = await page.$$(disciplineCodTemplate(i+1));
+                const disciplineCodeText = await page.evaluate(el => el.textContent?.trim(), disciplineCode[0]);
+                const gradesList = [];
+
+                for(let j = 0; j < 3; j++) {
+                    const gradeElement = await page.$$(disciplineGradeTemplate(j+1, i+1));
+                    if(gradeElement.length > 0) {
+                        const gradeElementText = await page.evaluate(el => el.textContent?.trim(), gradeElement[0])
+                        gradesList.push(Number(gradeElementText?.replace(",", ".")));
+                    } else {
+                        gradesList.push(0);
+                    }
+                }
+
+                const discipline = disciplines.find(d => d.cod === disciplineCodeText);
+
+                if(discipline){
+                    grades.push(new GradeDTO(discipline, Number(gradesList[0]), Number(gradesList[1]), Number(gradesList[2])));
+                }
+            }
+
+            return grades;
         }
     }
 }

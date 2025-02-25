@@ -12,6 +12,6 @@ export class SigaService {
     }
 
     public async getSigaInfos(loginDto: LoginDTO): Promise<void> {
-        console.log(await this.scraperService.main(loginDto))
+        await this.scraperService.main(loginDto)
     }
 }

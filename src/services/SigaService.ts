@@ -1,7 +1,4 @@
-import { AbsenceDTO } from "../dtos/Absences/AbsenceDTO";
 import { LoginDTO } from "../dtos/Auth/LoginDTO";
-import { ClasstimeDTO } from "../dtos/Classtime/ClasstimeDTO";
-import { DayTimesDTO } from "../dtos/Classtime/DayTimesDTO";
 import { ScraperService } from "./ScraperService";
 
 export class SigaService {

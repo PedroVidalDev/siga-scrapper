@@ -1,5 +1,6 @@
 import puppeteer, { Browser, Page } from "puppeteer";
 
+import { SigaDTO } from "../dtos/Siga/SigaDTO";
 import { LoginDTO } from "../dtos/Auth/LoginDTO";
 import { GradeDTO } from "../dtos/Grades/GradeDTO";
 import { AbsenceDTO } from "../dtos/Absences/AbsenceDTO";
@@ -15,7 +16,7 @@ export class ScraperService {
 
     private url: string = "https://siga.cps.sp.gov.br/aluno/login.aspx";
 
-    public async main(loginDto: LoginDTO) {
+    public async main(loginDto: LoginDTO): Promise<SigaDTO> {
         const browser: Browser = await puppeteer.launch({ headless: false});
         const page: Page = await browser.newPage();
 
@@ -28,17 +29,7 @@ export class ScraperService {
         await page.close();
         await browser.close();
 
-        console.log({disciplines})
-        console.log({absences})
-        console.log({classtimes})
-        console.log({grades})
-
-        return [
-            absences,
-            disciplines,
-            classtimes,
-            grades
-        ]
+        return new SigaDTO(absences!, disciplines!, classtimes!, grades!);
     }
 
     public async login(page: Page, loginDto: LoginDTO): Promise<boolean> {

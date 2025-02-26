@@ -1,4 +1,5 @@
 import { LoginDTO } from "../dtos/Auth/LoginDTO";
+import { SigaDTO } from "../dtos/Siga/SigaDTO";
 import { ScraperService } from "./ScraperService";
 
 export class SigaService {
@@ -9,6 +10,6 @@ export class SigaService {
     }
 
     public async getSigaInfos(loginDto: LoginDTO): Promise<void> {
-        await this.scraperService.main(loginDto)
+        const sigaDto: SigaDTO = await this.scraperService.main(loginDto)
     }
 }

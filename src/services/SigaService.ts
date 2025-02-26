@@ -1,7 +1,5 @@
-import { AbsenceDTO } from "../dtos/Absences/AbsenceDTO";
 import { LoginDTO } from "../dtos/Auth/LoginDTO";
-import { ClasstimeDTO } from "../dtos/Classtime/ClasstimeDTO";
-import { DayTimesDTO } from "../dtos/Classtime/DayTimesDTO";
+import { SigaDTO } from "../dtos/Siga/SigaDTO";
 import { ScraperService } from "./ScraperService";
 
 export class SigaService {
@@ -11,21 +9,7 @@ export class SigaService {
         this.scraperService = new ScraperService();
     }
 
-    public async getAbsencesInfo(loginDto: LoginDTO): Promise<AbsenceDTO[]> {
-        const absencesList: AbsenceDTO[] | undefined = await this.scraperService.getAbsencesInfo(loginDto);
-        if(absencesList) {
-            return absencesList;
-        } else {
-            throw new Error("Erro ao pegar informações.");
-        }
-    }
-
-    public async getClasstimeInfo(loginDto: LoginDTO): Promise<DayTimesDTO[]> {
-        const dayTimesList: DayTimesDTO[] | undefined = await this.scraperService.getClasstimeInfo(loginDto);
-        if(dayTimesList) {
-            return dayTimesList;
-        } else {
-            throw new Error("Erro ao pegar informações.");
-        }
+    public async getSigaInfos(loginDto: LoginDTO): Promise<void> {
+        const sigaDto: SigaDTO = await this.scraperService.main(loginDto)
     }
 }

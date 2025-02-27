@@ -1,3 +1,5 @@
+import { Discipline } from "../../entities/Discipline";
+
 export class DisciplineDTO {
     public cod: string;
     public name: string;
@@ -11,5 +13,9 @@ export class DisciplineDTO {
         this.cod = cod;
         this.name = name;
         this.teacher = teacher;
+    }
+
+    toEntity() {
+        return new Discipline(this.cod, this.name, this.teacher, this.id);
     }
 }

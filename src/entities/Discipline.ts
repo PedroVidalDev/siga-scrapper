@@ -6,13 +6,13 @@ export class Discipline {
     private name!: string
     private teacher!: string
 
-    constructor(disciplineDto: DisciplineDTO) {
-        if(disciplineDto.id) {
-            this.setId(disciplineDto.id);
+    constructor(cod: string, name: string, teacher: string, id?: number) {
+        if(id) {
+            this.setId(id);
         }
-        this.setCod(disciplineDto.cod);
-        this.setName(disciplineDto.name);
-        this.setTeacher(disciplineDto.teacher);
+        this.setCod(cod);
+        this.setName(name);
+        this.setTeacher(teacher);
     }
 
     getId(): number | undefined {

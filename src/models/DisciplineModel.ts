@@ -24,10 +24,10 @@ export class DisciplineModel {
 
     toEntity(): Discipline {
         return new Discipline(
-            this.id,
             this.cod,
             this.name,
-            this.teacher
+            this.teacher,
+            this.id
         );
     }
 }

@@ -2,6 +2,7 @@ import cors from "cors";
 import helmet from "helmet";
 import express, { Express } from "express";
 import router from "./routes/IndexRouter";
+import { DatabaseConn } from "./config/database/DatabaseConn";
 
 export class App {
     private static instance: App;
@@ -40,7 +41,10 @@ export class App {
         return this.expressApp;
     }
 
-    public run(port: number) {
+    public async run(port: number) {
+        const dataSource = DatabaseConn.getInstance();
+        await dataSource.initialize();
+
         return this.expressApp.listen(port, () => {
             console.log("Server start at port " + port);
         })
